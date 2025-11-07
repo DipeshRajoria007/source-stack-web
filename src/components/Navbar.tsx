@@ -18,12 +18,12 @@ export default function Navbar() {
         >
           Features
         </Link>
-        <a
-          href="#"
+        <Link
+          href="/pricing"
           className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
         >
           Pricing
-        </a>
+        </Link>
         <a
           href="#"
           className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
