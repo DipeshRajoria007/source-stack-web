@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, FileText, Folder, Sparkles, ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  X,
+  FileText,
+  Folder,
+  Sparkles,
+  ArrowRight,
+  CheckCircle2,
+  Check,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GoogleSheetsCard } from "@/components/GoogleSheetsCard";
 
@@ -22,7 +30,8 @@ const steps = [
   {
     id: 2,
     title: "We read between the lines",
-    description: "Our AI extracts candidate info faster than you can say 'hire me'.",
+    description:
+      "Our AI extracts candidate info faster than you can say 'hire me'.",
     pun: "Literally. We read every line. Every. Single. Line.",
     icon: FileText,
     animation: "pulse",
@@ -30,7 +39,8 @@ const steps = [
   {
     id: 3,
     title: "Spreadsheet magic ✨",
-    description: "Watch your resumes transform into organized rows and columns.",
+    description:
+      "Watch your resumes transform into organized rows and columns.",
     pun: "Abracadabra! Your hiring data is now spreadsheet-ready.",
     icon: Sparkles,
     animation: "spin",
@@ -107,22 +117,42 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
         </button>
 
         {/* Progress Indicator */}
-        <div className="flex items-center justify-center gap-2 mb-8">
+        <div className="flex items-center justify-center gap-3 mb-8">
           {steps.map((step, index) => (
-            <div key={step.id} className="flex items-center gap-2">
-              <div
-                className={`h-2 rounded-full transition-all duration-500 ease-in-out ${
-                  index === currentStep
-                    ? "bg-white w-8"
-                    : index < currentStep
-                    ? "bg-white/60 w-6"
-                    : "bg-white/20 w-2"
-                }`}
-              />
+            <div key={step.id} className="flex items-center">
+              {/* Step Circle */}
+              <div className="relative flex items-center justify-center">
+                <div
+                  className={`relative flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-500 ease-in-out ${
+                    index === currentStep
+                      ? "border-white bg-white/10 scale-110"
+                      : index < currentStep
+                      ? "border-white/60 bg-white/10 scale-100"
+                      : "border-white/20 bg-transparent scale-100"
+                  }`}
+                >
+                  {index < currentStep ? (
+                    <Check className="w-5 h-5 text-white" />
+                  ) : (
+                    <span
+                      className={`text-sm font-semibold transition-all duration-500 ${
+                        index === currentStep
+                          ? "text-white"
+                          : index < currentStep
+                          ? "text-white/60"
+                          : "text-white/30"
+                      }`}
+                    >
+                      {index + 1}
+                    </span>
+                  )}
+                </div>
+              </div>
+              {/* Connector Line */}
               {index < steps.length - 1 && (
                 <div
-                  className={`h-0.5 w-4 transition-all duration-500 ease-in-out ${
-                    index < currentStep ? "bg-white/40" : "bg-white/10"
+                  className={`h-0.5 w-8 mx-2 transition-all duration-500 ease-in-out ${
+                    index < currentStep ? "bg-white/60" : "bg-white/10"
                   }`}
                 />
               )}
@@ -140,18 +170,8 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
                 : "opacity-100 translate-y-0 scale-100"
             }`}
           >
-            {/* Icon with Animation */}
-            <div
-              className={`inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-6 transition-all duration-500 ${
-                !isExiting
-                  ? currentStepData.animation === "bounce"
-                    ? "animate-bounce"
-                    : currentStepData.animation === "pulse"
-                    ? "animate-pulse"
-                    : "animate-spin"
-                  : ""
-              }`}
-            >
+            {/* Icon */}
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-6">
               <Icon className="w-10 h-10 text-white" />
             </div>
 
@@ -188,18 +208,36 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
                     style={{
                       width: "120px",
                       height: "160px",
-                      transform: `translate(${index * 8}px, ${index * 8}px) rotate(${
+                      transform: `translate(${index * 8}px, ${
+                        index * 8
+                      }px) rotate(${
                         index === 0 ? -3 : index === 1 ? 2 : 0
                       }deg)`,
                       opacity: shouldShow
                         ? isProcessing
-                          ? (index === 2 ? 0.5 : index === 1 ? 0.4 : 0.3)
+                          ? index === 2
+                            ? 0.5
+                            : index === 1
+                            ? 0.4
+                            : 0.3
                           : isFinalStep
-                          ? (index === 2 ? 0.6 : index === 1 ? 0.5 : 0.4)
-                          : (index === 2 ? 1 : index === 1 ? 0.75 : 0.6)
+                          ? index === 2
+                            ? 0.6
+                            : index === 1
+                            ? 0.5
+                            : 0.4
+                          : index === 2
+                          ? 1
+                          : index === 1
+                          ? 0.75
+                          : 0.6
                         : 0,
                       zIndex: 10 - index,
-                      filter: isProcessing ? "blur(2px)" : isFinalStep ? "blur(1px)" : "none",
+                      filter: isProcessing
+                        ? "blur(2px)"
+                        : isFinalStep
+                        ? "blur(1px)"
+                        : "none",
                     }}
                   >
                     <div className="flex flex-col items-center justify-center h-full gap-2">
@@ -226,7 +264,9 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
               return (
                 <ArrowRight
                   className={`w-8 h-8 text-white/50 ${
-                    shouldAnimate ? "transition-opacity duration-500 ease-in-out" : ""
+                    shouldAnimate
+                      ? "transition-opacity duration-500 ease-in-out"
+                      : ""
                   }`}
                   style={{
                     opacity: isVisible ? 1 : 0,
@@ -246,14 +286,22 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
               return (
                 <div
                   className={`w-40 h-48 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 flex flex-col items-center justify-center gap-3 ${
-                    shouldAnimate ? "transition-opacity duration-500 ease-in-out" : ""
+                    shouldAnimate
+                      ? "transition-opacity duration-500 ease-in-out"
+                      : ""
                   }`}
                   style={{
                     opacity: isVisible ? 1 : 0,
                   }}
                 >
-                  <div className={`w-12 h-12 border-3 border-white/30 border-t-white rounded-full transition-all duration-300 ${displayStep === 1 && isVisible ? "animate-spin" : ""}`} />
-                  <span className="text-white text-sm font-medium">Processing...</span>
+                  <div
+                    className={`w-12 h-12 border-3 border-white/30 border-t-white rounded-full transition-all duration-300 ${
+                      displayStep === 1 && isVisible ? "animate-spin" : ""
+                    }`}
+                  />
+                  <span className="text-white text-sm font-medium">
+                    Processing...
+                  </span>
                 </div>
               );
             })()}
@@ -269,7 +317,9 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
               return (
                 <ArrowRight
                   className={`w-8 h-8 text-white/50 ${
-                    shouldAnimate ? "transition-opacity duration-500 ease-in-out" : ""
+                    shouldAnimate
+                      ? "transition-opacity duration-500 ease-in-out"
+                      : ""
                   }`}
                   style={{
                     opacity: isVisible ? 1 : 0,
@@ -288,7 +338,11 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
               const shouldAnimate = isNew || isRemoving;
               return (
                 <div
-                  className={shouldAnimate ? "transition-opacity duration-500 ease-in-out" : ""}
+                  className={
+                    shouldAnimate
+                      ? "transition-opacity duration-500 ease-in-out"
+                      : ""
+                  }
                   style={{
                     opacity: isVisible ? 1 : 0,
                   }}
@@ -319,7 +373,11 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
                 Previous
               </Button>
             )}
-            <Button onClick={handleNext} className="min-w-[120px]" disabled={isExiting}>
+            <Button
+              onClick={handleNext}
+              className="min-w-[120px]"
+              disabled={isExiting}
+            >
               {isLastStep ? (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
@@ -338,4 +396,3 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
     </div>
   );
 }
-
