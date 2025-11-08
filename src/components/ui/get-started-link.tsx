@@ -18,9 +18,9 @@ export function GetStartedLink({
   const router = useRouter();
 
   // Determine the href based on authentication status
-  const href = status === "loading" ? "/login" : session ? "/dashboard" : "/login";
+  const href = status === "loading" ? "/login" : session ? "/app" : "/login";
 
-  // Handle click to redirect authenticated users to dashboard
+  // Handle click to redirect authenticated users to app
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (status === "loading") {
       e.preventDefault();
@@ -28,7 +28,7 @@ export function GetStartedLink({
     }
     if (session) {
       e.preventDefault();
-      router.push("/dashboard");
+      router.push("/app");
     }
   };
 
@@ -38,4 +38,3 @@ export function GetStartedLink({
     </Link>
   );
 }
-
