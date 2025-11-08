@@ -258,7 +258,7 @@ export function ProcessFolderButton({
                   hasError: false,
                 });
               }
-              router.push(`/app/results/${newJobId}`);
+              router.push(`/results/${newJobId}`);
             }, 1500);
           } else if (jobStatus.status === "failed") {
             clearInterval(pollInterval);
