@@ -1,7 +1,7 @@
 import Background from "@/components/Background";
 import Navbar from "@/components/Navbar";
 import { FEATURES_CONFIG } from "@/constants";
-import Link from "next/link";
+import { GetStartedLink } from "@/components/ui/get-started-link";
 import { Check } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -116,12 +116,9 @@ export default function FeaturesPage() {
               <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
                 Start syncing resumes from Drive to Sheets in seconds.
               </p>
-              <Link
-                href={cta.href}
-                className="inline-block bg-white text-black px-8 py-4 rounded-lg text-base font-medium hover:bg-gray-100 transition-colors"
-              >
+              <GetStartedLink className="inline-block bg-white text-black px-8 py-4 rounded-lg text-base font-medium hover:bg-gray-100 transition-colors">
                 {cta.label}
-              </Link>
+              </GetStartedLink>
             </div>
           </div>
         </main>

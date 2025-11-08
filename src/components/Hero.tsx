@@ -1,6 +1,6 @@
 import { Play, FileText, Table2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ButtonLink } from "@/components/ui/button-link";
+import { GetStartedButton } from "@/components/ui/get-started-button";
 
 export default function Hero() {
   return (
@@ -19,9 +19,7 @@ export default function Hero() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-          <ButtonLink href="/login" size="lg">
-            Get Started Free
-          </ButtonLink>
+          <GetStartedButton size="lg" />
           <Button variant="outline" size="lg">
             <Play className="w-4 h-4" />
             Watch Demo

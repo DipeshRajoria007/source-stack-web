@@ -1,5 +1,6 @@
 import Background from "@/components/Background";
 import Navbar from "@/components/Navbar";
+import { GetStartedButton } from "@/components/ui/get-started-button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Check, Zap, Shield, Clock, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
@@ -64,9 +65,7 @@ export default function PricingPage() {
                   </p>
                 </div>
 
-                <ButtonLink href="/login" size="lg" className="w-full mb-8">
-                  Get Started Free
-                </ButtonLink>
+                <GetStartedButton size="lg" className="w-full mb-8" />
 
                 {/* Features List */}
                 <div className="space-y-4 mb-8">
@@ -199,9 +198,7 @@ export default function PricingPage() {
                 Start free, no credit card required.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <ButtonLink href="/login" size="lg">
-                  Get Started Free
-                </ButtonLink>
+                <GetStartedButton size="lg" />
                 <ButtonLink href="/features" variant="outline" size="lg">
                   View Features
                 </ButtonLink>
