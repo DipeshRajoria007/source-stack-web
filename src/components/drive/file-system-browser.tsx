@@ -31,12 +31,14 @@ interface FileSystemBrowserProps {
   onFolderSelect?: (folderId: string, folderName: string) => void;
   selectedFolderId?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export function FileSystemBrowser({
   onFolderSelect,
   selectedFolderId,
   className,
+  disabled = false,
 }: FileSystemBrowserProps) {
   const [folders, setFolders] = useState<FolderItem[]>([]);
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -123,6 +125,7 @@ export function FileSystemBrowser({
   }, [currentFolderId]);
 
   const handleFolderClick = (folder: FolderItem) => {
+    if (disabled) return;
     setCurrentFolderId(folder.id);
     setCurrentFolderName(folder.name);
     if (onFolderSelect) {
@@ -131,11 +134,13 @@ export function FileSystemBrowser({
   };
 
   const handleNavigateToFolder = (folderId: string, folderName: string) => {
+    if (disabled) return;
     setCurrentFolderId(folderId);
     setCurrentFolderName(folderName);
   };
 
   const handleGoBack = () => {
+    if (disabled) return;
     if (path.length > 1) {
       const parentFolder = path[path.length - 2];
       setCurrentFolderId(parentFolder.id);
@@ -147,6 +152,7 @@ export function FileSystemBrowser({
   };
 
   const handleGoToRoot = () => {
+    if (disabled) return;
     setCurrentFolderId(null);
     setCurrentFolderName("");
   };
@@ -201,13 +207,40 @@ export function FileSystemBrowser({
   });
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div
+      className={cn(
+        "space-y-4",
+        className,
+        disabled && "opacity-50 pointer-events-none relative"
+      )}
+    >
+      {/* Disabled Overlay */}
+      {disabled && (
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm rounded-lg z-50 flex items-center justify-center pointer-events-auto">
+          <div className="bg-white/10 border border-white/20 rounded-lg p-4 text-center">
+            <Loader2 className="w-6 h-6 animate-spin text-white mx-auto mb-2" />
+            <p className="text-white text-sm font-medium">
+              Processing in progress...
+            </p>
+            <p className="text-gray-400 text-xs mt-1">
+              Please wait before selecting a different folder
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Breadcrumb Navigation */}
       <div className="flex items-center gap-2 flex-wrap">
         {currentFolderId && (
           <button
             onClick={handleGoBack}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-sm text-gray-300 hover:text-white"
+            disabled={disabled}
+            className={cn(
+              "flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 transition-colors text-sm text-gray-300",
+              disabled
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-white/10 hover:text-white cursor-pointer"
+            )}
           >
             <ArrowLeft className="w-4 h-4" />
             Back
@@ -216,7 +249,13 @@ export function FileSystemBrowser({
         <div className="flex items-center gap-2 text-sm text-gray-400 flex-wrap">
           <button
             onClick={handleGoToRoot}
-            className="hover:text-white transition-colors"
+            disabled={disabled}
+            className={cn(
+              "transition-colors",
+              disabled
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:text-white cursor-pointer"
+            )}
           >
             Drive
           </button>
@@ -228,7 +267,13 @@ export function FileSystemBrowser({
               ) : (
                 <button
                   onClick={() => handleNavigateToFolder(folder.id, folder.name)}
-                  className="hover:text-white transition-colors"
+                  disabled={disabled}
+                  className={cn(
+                    "transition-colors",
+                    disabled
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:text-white cursor-pointer"
+                  )}
                 >
                   {folder.name}
                 </button>
@@ -271,12 +316,16 @@ export function FileSystemBrowser({
                   <div
                     key={item.id}
                     className={cn(
-                      "w-full flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer",
+                      "w-full flex items-center justify-between p-3 rounded-lg border transition-all",
+                      disabled
+                        ? "cursor-not-allowed opacity-50"
+                        : "cursor-pointer",
                       isSelected
                         ? "bg-white/10 border-white/30"
                         : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
                     )}
                     onClick={() => {
+                      if (disabled) return;
                       if (onFolderSelect) {
                         onFolderSelect(item.id, item.name);
                       }
@@ -296,11 +345,20 @@ export function FileSystemBrowser({
                       )}
                       <button
                         onClick={(e) => {
+                          if (disabled) return;
                           e.stopPropagation();
                           handleFolderClick(item);
                         }}
-                        className="p-1.5 rounded hover:bg-white/10 transition-colors text-white shrink-0"
-                        title="Open folder"
+                        disabled={disabled}
+                        className={cn(
+                          "p-1.5 rounded transition-colors text-white shrink-0",
+                          disabled
+                            ? "opacity-50 cursor-not-allowed"
+                            : "hover:bg-white/10 cursor-pointer"
+                        )}
+                        title={
+                          disabled ? "Processing in progress" : "Open folder"
+                        }
                         aria-label={`Open folder ${item.name}`}
                       >
                         <OpenIcon className="w-4 h-4" />

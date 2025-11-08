@@ -1,4 +1,9 @@
-import type { ParsedCandidate, HealthResponse } from "@/types/fastapi";
+import type {
+  ParsedCandidate,
+  HealthResponse,
+  BatchParseJobResponse,
+  BatchParseJobStatus,
+} from "@/types/fastapi";
 
 /**
  * API client configuration
@@ -115,7 +120,7 @@ export async function apiFetch<T>(
       // Try to get error details from response
       // Clone response first so we can read it multiple times if needed
       const clonedResponse = response.clone();
-      
+
       try {
         const errorData = await clonedResponse.json();
         errorDetails = errorData;
@@ -182,16 +187,17 @@ export async function apiFetch<T>(
               Object.entries(requestHeaders as Record<string, string>).map(
                 ([key, value]) => [
                   key,
-                  key.toLowerCase().includes("bearer") || key.toLowerCase().includes("key")
+                  key.toLowerCase().includes("bearer") ||
+                  key.toLowerCase().includes("key")
                     ? `${value.substring(0, 10)}...` // Mask sensitive headers
                     : value,
                 ]
               )
             ),
             body: fetchOptions.body
-              ? (typeof fetchOptions.body === "string"
-                  ? fetchOptions.body.substring(0, 200)
-                  : "[FormData or other]")
+              ? typeof fetchOptions.body === "string"
+                ? fetchOptions.body.substring(0, 200)
+                : "[FormData or other]"
               : undefined,
           };
         }
@@ -262,7 +268,7 @@ export async function parseFile(
 
 /**
  * Batch parse files from a Google Drive folder
- * 
+ *
  * Sends folder details to FastAPI, which will fetch all files from the folder
  * using the provided Google Bearer token.
  */
@@ -321,5 +327,168 @@ export async function batchParse(
 
   throw new Error(
     `Unexpected response format from batch-parse endpoint. Expected array, got: ${typeof response}`
+  );
+}
+
+/**
+ * Create an async batch parse job for large batches
+ *
+ * Returns a job ID that can be used to poll for status and results.
+ *
+ * @param folderId - Google Drive folder ID
+ * @param googleBearer - Google OAuth access token
+ * @param spreadsheetId - Optional existing Google Sheets spreadsheet ID
+ */
+export async function createBatchParseJob(
+  folderId: string,
+  googleBearer: string,
+  spreadsheetId?: string
+): Promise<BatchParseJobResponse> {
+  const requestBody: {
+    folder_id: string;
+    spreadsheet_id?: string;
+  } = {
+    folder_id: folderId,
+  };
+
+  // Only include spreadsheet_id if provided
+  if (spreadsheetId) {
+    requestBody.spreadsheet_id = spreadsheetId;
+  }
+
+  const isDev = process.env.NODE_ENV === "development";
+
+  if (isDev) {
+    console.log("[API] Create batch parse job:", {
+      url: `${FASTAPI_URL}/batch-parse-job`,
+      folderId,
+      spreadsheetId,
+      requestBody,
+    });
+  }
+
+  return apiFetch<BatchParseJobResponse>("/batch-parse-job", {
+    method: "POST",
+    body: JSON.stringify(requestBody),
+    googleBearer,
+  });
+}
+
+/**
+ * Get the status of a batch parse job
+ */
+export async function getBatchParseJobStatus(
+  jobId: string,
+  googleBearer: string
+): Promise<BatchParseJobStatus> {
+  const isDev = process.env.NODE_ENV === "development";
+
+  if (isDev) {
+    console.log("[API] Get batch parse job status:", {
+      url: `${FASTAPI_URL}/batch-parse-job/${jobId}/status`,
+      jobId,
+    });
+  }
+
+  return apiFetch<BatchParseJobStatus>(`/batch-parse-job/${jobId}/status`, {
+    method: "GET",
+    googleBearer,
+  });
+}
+
+/**
+ * Get the results of a completed batch parse job
+ *
+ * This endpoint returns the full list of parsed candidates.
+ * Only available when job status is "completed".
+ */
+export async function getBatchParseJobResults(
+  jobId: string,
+  googleBearer: string
+): Promise<ParsedCandidate[]> {
+  const isDev = process.env.NODE_ENV === "development";
+
+  if (isDev) {
+    console.log("[API] Get batch parse job results:", {
+      url: `${FASTAPI_URL}/batch-parse-job/${jobId}/results`,
+      jobId,
+    });
+  }
+
+  return apiFetch<ParsedCandidate[]>(`/batch-parse-job/${jobId}/results`, {
+    method: "GET",
+    googleBearer,
+  });
+}
+
+/**
+ * Poll for batch parse job completion
+ *
+ * Polls the job status endpoint until the job is completed or failed.
+ *
+ * @param jobId - The job ID returned from createBatchParseJob
+ * @param googleBearer - Google OAuth access token
+ * @param options - Polling options
+ * @returns Array of parsed candidate data
+ */
+export async function pollBatchParseJob(
+  jobId: string,
+  googleBearer: string,
+  options: {
+    interval?: number; // Polling interval in milliseconds (default: 2000)
+    maxAttempts?: number; // Maximum polling attempts (default: 300 = 10 minutes)
+    onProgress?: (status: BatchParseJobStatus) => void; // Progress callback
+  } = {}
+): Promise<ParsedCandidate[]> {
+  const { interval = 2000, maxAttempts = 300, onProgress } = options;
+
+  let attempts = 0;
+
+  while (attempts < maxAttempts) {
+    const status = await getBatchParseJobStatus(jobId, googleBearer);
+
+    // Call progress callback if provided
+    if (onProgress) {
+      onProgress(status);
+    }
+
+    if (status.status === "completed") {
+      console.log("[API] Job completed:", {
+        jobId,
+        status: status.status,
+        spreadsheetId: status.spreadsheet_id,
+        resultsCount: status.results_count,
+      });
+
+      // Fetch results from the separate results endpoint
+      try {
+        const results = await getBatchParseJobResults(jobId, googleBearer);
+        return results;
+      } catch (error) {
+        // If results endpoint fails, log but don't fail the whole operation
+        console.error("[API] Failed to fetch job results:", error);
+        throw new Error(
+          `Job completed but failed to fetch results: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
+
+    if (status.status === "failed") {
+      throw new Error(
+        status.error || status.message || "Job failed without error message"
+      );
+    }
+
+    // Job is still pending or processing, wait and poll again
+    await new Promise((resolve) => setTimeout(resolve, interval));
+    attempts++;
+  }
+
+  throw new Error(
+    `Job polling timeout after ${maxAttempts} attempts (${
+      (maxAttempts * interval) / 1000
+    }s)`
   );
 }
