@@ -14,6 +14,7 @@ import {
   Database,
   Copy,
   Check,
+  ArrowLeftIcon,
 } from "lucide-react";
 import type { BatchParseJobStatus } from "@/types/fastapi";
 import type { ParsedCandidate } from "@/types/fastapi";
@@ -249,9 +250,10 @@ export default function ResultsPage() {
           <div className="mb-8">
             <button
               onClick={() => router.push("/app")}
-              className="text-gray-400 hover:text-white mb-4 text-sm"
+              className="text-gray-400 hover:text-white mb-4 text-sm flex items-center gap-2"
             >
-              ← Back to App
+              <ArrowLeftIcon className="w-4 h-4" />
+              <span>Back to App</span>
             </button>
             <h1 className="text-4xl font-bold text-white mb-2">Job Results</h1>
             <p className="text-gray-300">Job ID: {jobId}</p>
@@ -547,4 +549,3 @@ export default function ResultsPage() {
     </div>
   );
 }
-
