@@ -52,20 +52,43 @@ pnpm install
    AUTH_URL=http://localhost:4000
    GOOGLE_CLIENT_ID=your-google-client-id
    GOOGLE_CLIENT_SECRET=your-google-client-secret
+   NEXT_PUBLIC_API_URL=http://localhost:8000
+   FASTAPI_KEY=your-fastapi-api-key-here
    ```
 
-   To get Google OAuth credentials:
+   **Google OAuth credentials:**
 
    - Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
    - Create a new OAuth 2.0 Client ID
    - Add authorized redirect URI: `http://localhost:4000/api/auth/callback/google`
    - Copy the Client ID and Client Secret to your `.env.local` file
 
+   **FastAPI Backend Configuration:**
+
+   - `NEXT_PUBLIC_API_URL`: The URL of your FastAPI backend service (e.g., `http://localhost:8000` for local development)
+   - `FASTAPI_KEY`: A shared secret API key for authenticating requests between Next.js and FastAPI
+
+   **Generate secrets:**
+
    Generate AUTH_SECRET:
 
    ```bash
    openssl rand -base64 32
    ```
+
+   Generate FASTAPI_KEY (use the same method):
+
+   ```bash
+   openssl rand -base64 32
+   ```
+
+   **Important:** The `FASTAPI_KEY` must be:
+
+   - The same value configured in your FastAPI backend's environment variables
+   - A secure, randomly generated string (use the command above)
+   - Kept secret and never committed to version control
+
+   Your FastAPI backend should validate this key by checking the `X-API-Key` header on incoming requests.
 
 4. Run the development server:
 
