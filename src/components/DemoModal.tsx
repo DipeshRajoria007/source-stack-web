@@ -99,7 +99,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
   const isLastStep = currentStep === steps.length - 1;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/10 backdrop-blur-md transition-opacity duration-300"
@@ -107,23 +107,23 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
       />
 
       {/* Modal */}
-      <div className="relative bg-black backdrop-blur-md border border-white/20 rounded-2xl p-8 max-w-5xl w-full shadow-2xl animate-in fade-in-0 zoom-in-95 duration-300">
+      <div className="relative bg-black backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 max-w-5xl w-full max-h-[95vh] overflow-y-auto shadow-2xl animate-in fade-in-0 zoom-in-95 duration-300">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+          className="absolute top-2 right-2 sm:top-4 sm:right-4 p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors z-10"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
 
         {/* Progress Indicator */}
-        <div className="flex items-center justify-center gap-3 mb-8">
+        <div className="flex items-center justify-center gap-1 sm:gap-2 md:gap-3 mb-6 sm:mb-8">
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center">
               {/* Step Circle */}
               <div className="relative flex items-center justify-center">
                 <div
-                  className={`relative flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-500 ease-in-out ${
+                  className={`relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 transition-all duration-500 ease-in-out ${
                     index === currentStep
                       ? "border-white bg-white/10 scale-110"
                       : index < currentStep
@@ -132,10 +132,10 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
                   }`}
                 >
                   {index < currentStep ? (
-                    <Check className="w-5 h-5 text-white" />
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   ) : (
                     <span
-                      className={`text-sm font-semibold transition-all duration-500 ${
+                      className={`text-xs sm:text-sm font-semibold transition-all duration-500 ${
                         index === currentStep
                           ? "text-white"
                           : index < currentStep
@@ -151,7 +151,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
               {/* Connector Line */}
               {index < steps.length - 1 && (
                 <div
-                  className={`h-0.5 w-8 mx-2 transition-all duration-500 ease-in-out ${
+                  className={`h-0.5 w-4 sm:w-6 md:w-8 mx-1 sm:mx-2 transition-all duration-500 ease-in-out ${
                     index < currentStep ? "bg-white/60" : "bg-white/10"
                   }`}
                 />
@@ -161,7 +161,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
         </div>
 
         {/* Content with smooth transitions */}
-        <div className="text-center mb-8 relative min-h-[200px]">
+        <div className="text-center mb-6 sm:mb-8 relative min-h-[150px] sm:min-h-[200px]">
           <div
             key={displayStep}
             className={`transition-all duration-500 ease-in-out ${
@@ -171,32 +171,32 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
             }`}
           >
             {/* Icon */}
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-6">
-              <Icon className="w-10 h-10 text-white" />
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-4 sm:mb-6">
+              <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </div>
 
             {/* Title */}
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4 px-2">
               {currentStepData.title}
             </h2>
 
             {/* Description */}
-            <p className="text-gray-300 text-lg mb-4">
+            <p className="text-gray-300 text-base sm:text-lg mb-3 sm:mb-4 px-2">
               {currentStepData.description}
             </p>
 
             {/* Pun */}
-            <p className="text-white/60 text-sm italic">
+            <p className="text-white/60 text-xs sm:text-sm italic px-2">
               {currentStepData.pun}
             </p>
           </div>
         </div>
 
         {/* Visual Demo */}
-        <div className="bg-white/5 rounded-lg p-8 mb-8 border border-white/10 min-h-[280px] flex items-center justify-center overflow-hidden">
-          <div className="flex items-center justify-center gap-6 w-full flex-wrap">
+        <div className="bg-white/5 rounded-lg p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 border border-white/10 min-h-[200px] sm:min-h-[280px] flex items-center justify-center overflow-hidden">
+          <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 w-full flex-wrap">
             {/* Resume Stack - Visible in steps 0, 1, and 2 - No fade animation, always visible */}
-            <div className="relative w-40 h-48 flex items-center justify-center">
+            <div className="relative w-24 h-32 sm:w-32 sm:h-40 md:w-40 md:h-48 flex items-center justify-center">
               {[0, 1, 2].map((index) => {
                 const shouldShow = displayStep <= 2;
                 const isProcessing = displayStep === 1;
@@ -204,12 +204,12 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
                 return (
                   <div
                     key={index}
-                    className="absolute bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-4 transition-all duration-300 ease-in-out shadow-lg"
+                    className="absolute bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-2 sm:p-3 md:p-4 transition-all duration-300 ease-in-out shadow-lg"
                     style={{
-                      width: "120px",
-                      height: "160px",
-                      transform: `translate(${index * 8}px, ${
-                        index * 8
+                      width: "clamp(80px, 20vw, 120px)",
+                      height: "clamp(100px, 25vw, 160px)",
+                      transform: `translate(${index * 4}px, ${
+                        index * 4
                       }px) rotate(${
                         index === 0 ? -3 : index === 1 ? 2 : 0
                       }deg)`,
@@ -240,12 +240,12 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
                         : "none",
                     }}
                   >
-                    <div className="flex flex-col items-center justify-center h-full gap-2">
-                      <FileText className="w-10 h-10 text-white mb-2" />
-                      <div className="w-full h-2 bg-white/20 rounded mb-1"></div>
-                      <div className="w-3/4 h-2 bg-white/20 rounded mb-1"></div>
-                      <div className="w-full h-2 bg-white/20 rounded mb-1"></div>
-                      <div className="w-2/3 h-2 bg-white/20 rounded"></div>
+                    <div className="flex flex-col items-center justify-center h-full gap-1 sm:gap-2">
+                      <FileText className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white mb-1 sm:mb-2" />
+                      <div className="w-full h-1.5 sm:h-2 bg-white/20 rounded mb-0.5 sm:mb-1"></div>
+                      <div className="w-3/4 h-1.5 sm:h-2 bg-white/20 rounded mb-0.5 sm:mb-1"></div>
+                      <div className="w-full h-1.5 sm:h-2 bg-white/20 rounded mb-0.5 sm:mb-1"></div>
+                      <div className="w-2/3 h-1.5 sm:h-2 bg-white/20 rounded"></div>
                     </div>
                   </div>
                 );
@@ -263,7 +263,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
               const shouldAnimate = isNew || isRemoving;
               return (
                 <ArrowRight
-                  className={`w-8 h-8 text-white/50 ${
+                  className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white/50 ${
                     shouldAnimate
                       ? "transition-opacity duration-500 ease-in-out"
                       : ""
@@ -285,7 +285,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
               const shouldAnimate = isNew || isRemoving;
               return (
                 <div
-                  className={`w-40 h-48 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 flex flex-col items-center justify-center gap-3 ${
+                  className={`w-28 h-32 sm:w-32 sm:h-40 md:w-40 md:h-48 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-3 sm:p-4 md:p-6 flex flex-col items-center justify-center gap-2 sm:gap-3 ${
                     shouldAnimate
                       ? "transition-opacity duration-500 ease-in-out"
                       : ""
@@ -295,11 +295,11 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
                   }}
                 >
                   <div
-                    className={`w-12 h-12 border-3 border-white/30 border-t-white rounded-full transition-all duration-300 ${
+                    className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 border-3 border-white/30 border-t-white rounded-full transition-all duration-300 ${
                       displayStep === 1 && isVisible ? "animate-spin" : ""
                     }`}
                   />
-                  <span className="text-white text-sm font-medium">
+                  <span className="text-white text-xs sm:text-sm font-medium">
                     Processing...
                   </span>
                 </div>
@@ -316,7 +316,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
               const shouldAnimate = isNew || isRemoving;
               return (
                 <ArrowRight
-                  className={`w-8 h-8 text-white/50 ${
+                  className={`w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white/50 ${
                     shouldAnimate
                       ? "transition-opacity duration-500 ease-in-out"
                       : ""
@@ -355,33 +355,35 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
           <button
             onClick={handleSkip}
-            className="text-white/60 hover:text-white transition-colors text-sm"
+            className="text-white/60 hover:text-white transition-colors text-xs sm:text-sm text-center sm:text-left order-2 sm:order-1"
           >
             Skip Demo
           </button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 order-1 sm:order-2 w-full sm:w-auto">
             {currentStep > 0 && (
               <Button
                 variant="outline"
                 onClick={handlePrevious}
                 disabled={isExiting}
+                className="flex-1 sm:flex-none text-sm"
               >
                 Previous
               </Button>
             )}
             <Button
               onClick={handleNext}
-              className="min-w-[120px]"
+              className="min-w-[100px] sm:min-w-[120px] flex-1 sm:flex-none text-sm"
               disabled={isExiting}
             >
               {isLastStep ? (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
-                  Get Started
+                  <span className="hidden sm:inline">Get Started</span>
+                  <span className="sm:hidden">Start</span>
                 </>
               ) : (
                 <>
