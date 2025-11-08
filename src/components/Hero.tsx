@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Play, FileText, Table2, ArrowRight } from "lucide-react";
+import { FileText, ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GetStartedButton } from "@/components/ui/get-started-button";
+import { DemoModal } from "@/components/DemoModal";
+import { GoogleSheetsCard } from "@/components/GoogleSheetsCard";
 
 export default function Hero() {
   const [topCard, setTopCard] = useState<number>(2); // 0, 1, or 2 (index of top card)
   const [isVisible, setIsVisible] = useState(false);
+  const [isDemoOpen, setIsDemoOpen] = useState(false);
 
   useEffect(() => {
     // Trigger animation after component mounts
@@ -142,12 +145,16 @@ export default function Hero() {
           <Button
             variant="outline"
             size="lg"
+            onClick={() => setIsDemoOpen(true)}
             className="transition-all duration-200 hover:scale-105 hover:bg-white/5"
           >
             <Play className="w-4 h-4" />
             Watch Demo
           </Button>
         </div>
+
+        {/* Demo Modal */}
+        <DemoModal isOpen={isDemoOpen} onClose={() => setIsDemoOpen(false)} />
 
         {/* Screenshot Mock - Resume PDF → Spreadsheet */}
         <div
@@ -206,40 +213,7 @@ export default function Hero() {
             </div>
 
             {/* Spreadsheet Card */}
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 w-full md:w-96 shadow-2xl transition-all duration-200 hover:bg-white/12 hover:border-white/30">
-              <div className="flex items-center gap-3 mb-4">
-                <Table2 className="w-6 h-6 text-white" />
-                <span className="text-white font-medium">Google Sheets</span>
-              </div>
-              <div className="bg-white/5 rounded overflow-hidden">
-                <table className="w-full text-white text-xs">
-                  <thead>
-                    <tr className="border-b border-white/20">
-                      <th className="p-2 text-left">Name</th>
-                      <th className="p-2 text-left">Email</th>
-                      <th className="p-2 text-left">Experience</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-white/10">
-                      <td className="p-2">John Doe</td>
-                      <td className="p-2">john@email.com</td>
-                      <td className="p-2">5 years</td>
-                    </tr>
-                    <tr className="border-b border-white/10">
-                      <td className="p-2">Jane Smith</td>
-                      <td className="p-2">jane@email.com</td>
-                      <td className="p-2">3 years</td>
-                    </tr>
-                    <tr>
-                      <td className="p-2">Mike Johnson</td>
-                      <td className="p-2">mike@email.com</td>
-                      <td className="p-2">7 years</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <GoogleSheetsCard />
           </div>
         </div>
       </div>
