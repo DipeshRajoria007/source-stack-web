@@ -30,16 +30,16 @@ export interface ApiFetchOptions extends RequestInit {
 
 /**
  * Central fetch wrapper for FastAPI backend
- * 
+ *
  * Automatically attaches:
  * - X-API-Key header
  * - X-Google-Bearer header (if provided)
- * 
+ *
  * Handles:
  * - JSON responses
  * - Multipart/form-data requests
  * - Error handling with dev/prod differences
- * 
+ *
  * @param path - API endpoint path (e.g., '/health', '/parse')
  * @param options - Fetch options with optional googleBearer and isMultipart flags
  * @returns Typed response data
@@ -58,7 +58,8 @@ export async function apiFetch<T>(
 
   // Add Google Bearer token if provided
   if (googleBearer) {
-    (requestHeaders as Record<string, string>)["X-Google-Bearer"] = googleBearer;
+    (requestHeaders as Record<string, string>)["X-Google-Bearer"] =
+      googleBearer;
   }
 
   // Merge user-provided headers
@@ -87,8 +88,12 @@ export async function apiFetch<T>(
   }
 
   // Set Content-Type for JSON requests (unless multipart or already set)
-  if (!isMultipart && !(requestHeaders as Record<string, string>)["Content-Type"]) {
-    (requestHeaders as Record<string, string>)["Content-Type"] = "application/json";
+  if (
+    !isMultipart &&
+    !(requestHeaders as Record<string, string>)["Content-Type"]
+  ) {
+    (requestHeaders as Record<string, string>)["Content-Type"] =
+      "application/json";
   }
 
   const url = `${API_URL}${path}`;
@@ -148,7 +153,7 @@ export async function apiFetch<T>(
     // Handle network errors
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error occurred";
-    
+
     if (isDev) {
       console.error("[API] Network error:", errorMessage);
     }
@@ -195,4 +200,3 @@ export async function batchParse(
     googleBearer,
   });
 }
-

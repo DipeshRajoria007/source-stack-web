@@ -7,10 +7,10 @@ import type { GoogleDriveFile } from "@/lib/google-drive";
 
 /**
  * Server action to batch parse files from Google Drive
- * 
+ *
  * Accepts an array of Google Drive files and sends them to the FastAPI
  * /batch-parse endpoint with the user's Google OAuth access token.
- * 
+ *
  * @param files - Array of Google Drive files with id and name
  * @returns Array of parsed candidate data
  * @throws Error if user is not authenticated or API request fails
@@ -42,4 +42,3 @@ export async function batchParseAction(
   // Call API with Google Bearer token
   return apiBatchParse(apiFiles, accessToken);
 }
-
