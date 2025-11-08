@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Background from "@/components/Background";
 import Navbar from "@/components/Navbar";
 import { FEATURES_CONFIG } from "@/constants";
@@ -21,11 +21,13 @@ function ResumeExtractionDemo() {
     email: "",
     phone: "",
   });
-  const [isExtracting, setIsExtracting] = useState(true);
+  const [isExtracting, setIsExtracting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [currentField, setCurrentField] = useState<
     "name" | "email" | "phone" | null
   >(null);
+  const [isInView, setIsInView] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Generate random Indian resume details
   const generateRandomResume = () => {
@@ -86,6 +88,29 @@ function ResumeExtractionDemo() {
     return { name, email, phone };
   };
 
+  // Intersection Observer to detect when component is in viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsInView(entry.isIntersecting);
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRef = containerRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const timeouts: NodeJS.Timeout[] = [];
     let isMounted = true;
@@ -95,8 +120,17 @@ function ResumeExtractionDemo() {
       timeouts.length = 0;
     };
 
+    // Reset state when leaving viewport
+    if (!isInView) {
+      setExtractedFields({ name: "", email: "", phone: "" });
+      setIsExtracting(false);
+      setIsComplete(false);
+      setCurrentField(null);
+      return;
+    }
+
     const startExtraction = () => {
-      if (!isMounted) return;
+      if (!isMounted || !isInView) return;
 
       const resumeData = generateRandomResume();
       const fields = [
@@ -174,11 +208,11 @@ function ResumeExtractionDemo() {
       isMounted = false;
       clearAllTimeouts();
     };
-  }, []);
+  }, [isInView]);
 
   return (
-    <div className="w-full mx-auto px-2">
-      <div className="flex  w-full flex-col md:flex-row items-center gap-4 md:gap-6">
+    <div ref={containerRef} className="w-full max-w-2xl mx-auto px-2">
+      <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
         {/* Left: Resume Document */}
         <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-4 shadow-lg flex-shrink-0 w-full max-w-[180px] md:w-48">
           <div className="flex items-center gap-2 mb-3">
@@ -288,6 +322,8 @@ function SheetsSyncDemo() {
   >([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [currentRowIndex, setCurrentRowIndex] = useState(-1);
+  const [isInView, setIsInView] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Generate random Indian resume details
   const generateRandomResume = () => {
@@ -348,6 +384,29 @@ function SheetsSyncDemo() {
     return { name, email, phone };
   };
 
+  // Intersection Observer to detect when component is in viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsInView(entry.isIntersecting);
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRef = containerRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const timeouts: NodeJS.Timeout[] = [];
     let isMounted = true;
@@ -357,8 +416,16 @@ function SheetsSyncDemo() {
       timeouts.length = 0;
     };
 
+    // Reset state when leaving viewport
+    if (!isInView) {
+      setSyncedRows([]);
+      setIsSyncing(false);
+      setCurrentRowIndex(-1);
+      return;
+    }
+
     const syncRow = (rowIndex: number) => {
-      if (!isMounted) return;
+      if (!isMounted || !isInView) return;
 
       const newRow = generateRandomResume();
 
@@ -417,10 +484,10 @@ function SheetsSyncDemo() {
       isMounted = false;
       clearAllTimeouts();
     };
-  }, []);
+  }, [isInView]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div ref={containerRef} className="w-full max-w-2xl mx-auto">
       <div className="flex flex-col items-center gap-4">
         {/* Sync Indicator */}
         <div className="flex items-center gap-3 w-full justify-center">
@@ -471,7 +538,6 @@ function SheetsSyncDemo() {
           <div className="divide-y divide-white/10">
             {[0, 1, 2].map((index) => {
               const row = syncedRows[index];
-              const isCurrentRow = currentRowIndex === index;
               const isSyncingRow = row?.status === "syncing";
               const isSyncedRow = row?.status === "synced";
 
