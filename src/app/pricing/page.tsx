@@ -1,17 +1,21 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Background from "@/components/Background";
 import Navbar from "@/components/Navbar";
 import { GetStartedButton } from "@/components/ui/get-started-button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Check, Zap, Shield, Clock, Sparkles } from "lucide-react";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Pricing - SourceStack",
-  description:
-    "Start automating your hiring workflow today. SourceStack is free to use — automate resume parsing and Google Sheets sync.",
-};
 
 export default function PricingPage() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 10);
+    return () => clearTimeout(timer);
+  }, []);
   return (
     <div className="min-h-screen relative overflow-hidden">
       <Background />
@@ -21,7 +25,13 @@ export default function PricingPage() {
         <main className="flex-1 px-6 md:px-12 lg:px-16 py-24">
           <div className="max-w-6xl mx-auto">
             {/* Header Section */}
-            <div className="text-center mb-20">
+            <div
+              className={`text-center mb-20 transition-all duration-1000 ease-out ${
+                isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
+            >
               <span className="inline-block px-4 py-2 bg-white/10 border border-white/20 rounded-full text-white text-sm font-medium mb-6">
                 Simple Pricing
               </span>
@@ -40,7 +50,13 @@ export default function PricingPage() {
             </div>
 
             {/* Free Plan Card */}
-            <div className="max-w-2xl mx-auto mb-16">
+            <div
+              className={`max-w-2xl mx-auto mb-16 transition-all duration-1000 ease-out delay-200 ${
+                isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
+            >
               <div className="bg-white/5 backdrop-blur-sm border-2 border-white/20 rounded-2xl p-8 md:p-12 relative overflow-hidden">
                 {/* Free Badge */}
                 <div className="absolute top-6 right-6">
@@ -143,7 +159,13 @@ export default function PricingPage() {
             </div>
 
             {/* Benefits Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <div
+              className={`grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 transition-all duration-1000 ease-out delay-300 ${
+                isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
+            >
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 text-center">
                 <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center mx-auto mb-4">
                   <Zap className="w-6 h-6 text-white" />
@@ -184,7 +206,13 @@ export default function PricingPage() {
             </div>
 
             {/* CTA Section */}
-            <div className="text-center bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-12">
+            <div
+              className={`text-center bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-12 transition-all duration-1000 ease-out delay-500 ${
+                isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
+            >
               <div className="flex justify-center mb-6">
                 <div className="w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
                   <Sparkles className="w-8 h-8 text-white" />

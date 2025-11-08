@@ -1,18 +1,22 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Background from "@/components/Background";
 import Navbar from "@/components/Navbar";
 import { FEATURES_CONFIG } from "@/constants";
 import { GetStartedLink } from "@/components/ui/get-started-link";
 import { Check } from "lucide-react";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Features - SourceStack",
-  description:
-    "Everything you need to automate HR data. From Drive ingestion to Sheet sync — built for speed, accuracy, and control.",
-};
 
 export default function FeaturesPage() {
   const { header, features, highlights, cta } = FEATURES_CONFIG;
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 10);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -23,7 +27,13 @@ export default function FeaturesPage() {
         <main className="flex-1 px-6 md:px-12 lg:px-16 py-24">
           <div className="max-w-7xl mx-auto">
             {/* Header Section */}
-            <div className="text-center mb-20">
+            <div
+              className={`text-center mb-20 transition-all duration-1000 ease-out ${
+                isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
+            >
               <span className="inline-block px-4 py-2 bg-white/10 border border-white/20 rounded-full text-white text-sm font-medium mb-6">
                 {header.badge}
               </span>
@@ -36,7 +46,13 @@ export default function FeaturesPage() {
             </div>
 
             {/* Features Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24 transition-all duration-1000 ease-out delay-200 ${
+                isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
+            >
               {features.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
@@ -66,7 +82,13 @@ export default function FeaturesPage() {
             </div>
 
             {/* Highlights Section */}
-            <div className="space-y-24 mb-24">
+            <div
+              className={`space-y-24 mb-24 transition-all duration-1000 ease-out delay-300 ${
+                isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
+            >
               {highlights.map((highlight, index) => (
                 <div
                   key={index}
@@ -109,7 +131,13 @@ export default function FeaturesPage() {
             </div>
 
             {/* CTA Section */}
-            <div className="text-center bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-12">
+            <div
+              className={`text-center bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-12 transition-all duration-1000 ease-out delay-500 ${
+                isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4"
+              }`}
+            >
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
                 Ready to automate your hiring stack?
               </h2>
