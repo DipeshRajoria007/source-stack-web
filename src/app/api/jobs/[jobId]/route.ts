@@ -31,7 +31,8 @@ export async function GET(
 
     // Handle both sync and async params (Next.js 15+)
     const resolvedParams = await Promise.resolve(params);
-    const jobId = resolvedParams.jobId || (resolvedParams as any).id;
+    const jobId =
+      "jobId" in resolvedParams ? resolvedParams.jobId : resolvedParams.id;
 
     if (!jobId) {
       return NextResponse.json(
@@ -58,6 +59,11 @@ export async function GET(
       jobId,
       status,
       results,
+      // Pass through timestamp fields from the status
+      createdAt: status.created_at,
+      startedAt: status.started_at,
+      completedAt: status.completed_at,
+      durationSeconds: status.duration_seconds,
     });
   } catch (error) {
     console.error("Error fetching job details:", error);

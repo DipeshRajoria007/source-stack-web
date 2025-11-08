@@ -23,7 +23,9 @@ interface JobDetails {
   status: BatchParseJobStatus;
   results?: ParsedCandidate[];
   createdAt?: string;
+  startedAt?: string;
   completedAt?: string;
+  durationSeconds?: number;
   folderId?: string;
   folderName?: string;
 }
@@ -38,6 +40,7 @@ export default function ResultsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [createdAt, setCreatedAt] = useState<Date | null>(null);
+  const [startedAt, setStartedAt] = useState<Date | null>(null);
   const [completedAt, setCompletedAt] = useState<Date | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -80,19 +83,34 @@ export default function ResultsPage() {
 
       setJobDetails(data);
 
-      // Set timestamps - use current time as fallback if not provided
+      // Debug: Log duration data
+      console.log("Job details data:", {
+        durationSeconds: data.durationSeconds,
+        statusDurationSeconds: data.status?.duration_seconds,
+        status: data.status,
+        fullData: data,
+      });
+
+      // Set timestamps from API response
       if (data.createdAt) {
         setCreatedAt(new Date(data.createdAt));
-      } else {
-        // Estimate creation time (could be improved with actual API timestamps)
-        setCreatedAt(new Date());
+      } else if (data.status?.created_at) {
+        setCreatedAt(new Date(data.status.created_at));
       }
 
+      // Set started_at timestamp
+      if (data.startedAt) {
+        setStartedAt(new Date(data.startedAt));
+      } else if (data.status?.started_at) {
+        setStartedAt(new Date(data.status.started_at));
+      }
+
+      // Set completed_at timestamp
       if (data.status.status === "completed") {
         if (data.completedAt) {
           setCompletedAt(new Date(data.completedAt));
-        } else {
-          setCompletedAt(new Date());
+        } else if (data.status?.completed_at) {
+          setCompletedAt(new Date(data.status.completed_at));
         }
       }
     } catch (err) {
@@ -116,8 +134,43 @@ export default function ResultsPage() {
   };
 
   const getDuration = () => {
-    if (!createdAt || !completedAt) return null;
-    const diffMs = completedAt.getTime() - createdAt.getTime();
+    // First try to use duration_seconds from API if available
+    // Check both top-level durationSeconds and status.duration_seconds
+    const durationSecondsValue =
+      jobDetails?.durationSeconds ?? jobDetails?.status?.duration_seconds;
+
+    // Check if we have a valid duration value (including 0)
+    if (
+      durationSecondsValue !== undefined &&
+      durationSecondsValue !== null &&
+      !isNaN(durationSecondsValue)
+    ) {
+      const durationSeconds = Math.floor(durationSecondsValue);
+
+      // Handle 0 seconds case
+      if (durationSeconds === 0) {
+        return "0s";
+      }
+
+      const diffHours = Math.floor(durationSeconds / 3600);
+      const diffMinutes = Math.floor((durationSeconds % 3600) / 60);
+      const diffSeconds = durationSeconds % 60;
+
+      if (diffHours > 0) {
+        return `${diffHours}h ${diffMinutes}m`;
+      } else if (diffMinutes > 0) {
+        return `${diffMinutes}m ${diffSeconds}s`;
+      } else {
+        return `${diffSeconds}s`;
+      }
+    }
+
+    // Fallback to calculating from timestamps
+    // Use started_at if available, otherwise created_at
+    const startTime = startedAt || createdAt;
+    if (!startTime || !completedAt) return null;
+
+    const diffMs = completedAt.getTime() - startTime.getTime();
     const diffSeconds = Math.floor(diffMs / 1000);
     const diffMinutes = Math.floor(diffSeconds / 60);
     const diffHours = Math.floor(diffMinutes / 60);
@@ -303,11 +356,22 @@ export default function ResultsPage() {
 
                 {/* Timestamps */}
                 <div className="space-y-3">
-                  {createdAt && (
+                  {startedAt && (
                     <div className="flex items-start gap-2 text-gray-300">
                       <Clock className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <span className="text-xs text-gray-400">Started</span>
+                        <p className="text-white text-sm">
+                          {formatTimestamp(startedAt)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {!startedAt && createdAt && (
+                    <div className="flex items-start gap-2 text-gray-300">
+                      <Clock className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs text-gray-400">Created</span>
                         <p className="text-white text-sm">
                           {formatTimestamp(createdAt)}
                         </p>
@@ -327,7 +391,11 @@ export default function ResultsPage() {
                     </div>
                   )}
 
-                  {createdAt && completedAt && (
+                  {/* Duration - Always show for completed jobs, or if we have duration data */}
+                  {(status.status === "completed" ||
+                    jobDetails?.durationSeconds !== undefined ||
+                    jobDetails?.status?.duration_seconds !== undefined ||
+                    ((startedAt || createdAt) && completedAt)) && (
                     <div className="flex items-start gap-2 text-gray-300">
                       <Calendar className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">

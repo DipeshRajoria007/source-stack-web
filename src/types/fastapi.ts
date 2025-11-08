@@ -47,4 +47,8 @@ export interface BatchParseJobStatus {
   results_count?: number;
   message?: string;
   error?: string | null;
+  created_at?: string; // ISO 8601 timestamp (when job was created)
+  started_at?: string; // ISO 8601 timestamp (when job started processing)
+  completed_at?: string; // ISO 8601 timestamp (when job completed)
+  duration_seconds?: number; // Duration in seconds (float, e.g., 216.11)
 }
