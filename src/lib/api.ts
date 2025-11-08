@@ -3,10 +3,10 @@ import type { ParsedCandidate, HealthResponse } from "@/types/fastapi";
 /**
  * API client configuration
  */
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const FASTAPI_URL = process.env.NEXT_PUBLIC_API_URL;
 const API_KEY = process.env.FASTAPI_KEY;
 
-if (!API_URL) {
+if (!FASTAPI_URL) {
   throw new Error("NEXT_PUBLIC_API_URL environment variable is not set");
 }
 
@@ -96,7 +96,7 @@ export async function apiFetch<T>(
       "application/json";
   }
 
-  const url = `${API_URL}${path}`;
+  const url = `${FASTAPI_URL}${path}`;
   const isDev = process.env.NODE_ENV === "development";
 
   try {
@@ -109,14 +109,46 @@ export async function apiFetch<T>(
     if (!response.ok) {
       const status = response.status;
       let errorMessage = `API request failed: ${status} ${response.statusText}`;
+      let errorDetails: unknown = null;
+      let errorText: string | null = null;
 
+      // Try to get error details from response
+      // Clone response first so we can read it multiple times if needed
+      const clonedResponse = response.clone();
+      
       try {
-        const errorData = await response.json();
-        errorMessage = errorData.detail || errorData.message || errorMessage;
+        const errorData = await clonedResponse.json();
+        errorDetails = errorData;
+        // FastAPI typically uses 'detail' field for errors
+        if (errorData.detail) {
+          // Handle both string and object detail fields
+          if (typeof errorData.detail === "string") {
+            errorMessage = errorData.detail;
+          } else if (Array.isArray(errorData.detail)) {
+            // FastAPI validation errors are arrays
+            errorMessage = errorData.detail
+              .map((err: unknown) => {
+                if (typeof err === "object" && err !== null && "msg" in err) {
+                  return String((err as { msg: unknown }).msg);
+                }
+                return JSON.stringify(err);
+              })
+              .join(", ");
+          } else {
+            errorMessage = JSON.stringify(errorData.detail);
+          }
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else {
+          // If no standard error field, stringify the whole response
+          errorMessage = `${errorMessage}. Response: ${JSON.stringify(
+            errorData
+          )}`;
+        }
       } catch {
-        // If response is not JSON, try to get text
+        // If JSON parsing fails, try to get text from original response
         try {
-          const errorText = await response.text();
+          errorText = await response.text();
           if (errorText) {
             errorMessage = `${errorMessage}. ${errorText}`;
           }
@@ -125,15 +157,46 @@ export async function apiFetch<T>(
         }
       }
 
-      // Log errors in development
+      // Log full error details in development (especially for 500 errors)
       if (isDev) {
-        if (status === 401) {
-          console.error("[API] Authentication failed:", errorMessage);
-        } else if (status >= 500) {
-          console.error("[API] Server error:", errorMessage);
-        } else {
-          console.error("[API] Request failed:", errorMessage);
+        const logData: Record<string, unknown> = {
+          url,
+          status,
+          statusText: response.statusText,
+          errorMessage,
+        };
+
+        if (errorDetails) {
+          logData.errorDetails = errorDetails;
         }
+        if (errorText) {
+          logData.errorText = errorText;
+        }
+
+        // Log request details for debugging
+        if (status >= 500) {
+          // For server errors, log request details too
+          logData.requestDetails = {
+            method: fetchOptions.method || "GET",
+            headers: Object.fromEntries(
+              Object.entries(requestHeaders as Record<string, string>).map(
+                ([key, value]) => [
+                  key,
+                  key.toLowerCase().includes("bearer") || key.toLowerCase().includes("key")
+                    ? `${value.substring(0, 10)}...` // Mask sensitive headers
+                    : value,
+                ]
+              )
+            ),
+            body: fetchOptions.body
+              ? (typeof fetchOptions.body === "string"
+                  ? fetchOptions.body.substring(0, 200)
+                  : "[FormData or other]")
+              : undefined,
+          };
+        }
+
+        console.error(`[API] Error ${status}:`, logData);
       }
 
       // In production, throw error
@@ -143,6 +206,16 @@ export async function apiFetch<T>(
 
     // Parse JSON response
     const data = await response.json();
+
+    // Handle case where response might be wrapped unexpectedly
+    if (isDev) {
+      console.log("[API] Response received:", {
+        path,
+        dataType: Array.isArray(data) ? "array" : typeof data,
+        dataLength: Array.isArray(data) ? data.length : undefined,
+      });
+    }
+
     return data as T;
   } catch (error) {
     // Re-throw if it's already an Error we created
@@ -188,15 +261,65 @@ export async function parseFile(
 }
 
 /**
- * Batch parse files from Google Drive
+ * Batch parse files from a Google Drive folder
+ * 
+ * Sends folder details to FastAPI, which will fetch all files from the folder
+ * using the provided Google Bearer token.
  */
 export async function batchParse(
-  files: Array<{ id: string; name: string }>,
+  folderId: string,
+  folderName: string,
   googleBearer: string
 ): Promise<ParsedCandidate[]> {
-  return apiFetch<ParsedCandidate[]>("/batch-parse", {
+  const requestBody = {
+    folder_id: folderId,
+    folder_name: folderName,
+  };
+  const isDev = process.env.NODE_ENV === "development";
+
+  if (isDev) {
+    console.log("[API] Batch parse request:", {
+      url: `${FASTAPI_URL}/batch-parse`,
+      folderId,
+      folderName,
+    });
+  }
+
+  const response = await apiFetch<any>("/batch-parse", {
     method: "POST",
-    body: JSON.stringify({ files }),
+    body: JSON.stringify(requestBody),
     googleBearer,
   });
+
+  // Handle different response formats
+  // FastAPI might return the array directly or wrapped
+  if (Array.isArray(response)) {
+    return response as ParsedCandidate[];
+  }
+
+  // If wrapped in an object, try to extract the array
+  if (response && typeof response === "object") {
+    if (Array.isArray(response.results)) {
+      return response.results as ParsedCandidate[];
+    }
+    if (Array.isArray(response.data)) {
+      return response.data as ParsedCandidate[];
+    }
+    if (Array.isArray(response.files)) {
+      return response.files as ParsedCandidate[];
+    }
+  }
+
+  // If we get here, the response format is unexpected
+  if (isDev) {
+    console.error("[API] Unexpected batch parse response format:", {
+      response,
+      responseType: typeof response,
+      isArray: Array.isArray(response),
+    });
+  }
+
+  throw new Error(
+    `Unexpected response format from batch-parse endpoint. Expected array, got: ${typeof response}`
+  );
 }

@@ -9,7 +9,7 @@ import type { ParsedCandidate } from "@/types/fastapi";
 
 interface ProcessFolderButtonProps {
   folderId: string;
-  folderName: string;
+  folderName?: string;
   onProcessComplete?: (results: ParsedCandidate[]) => void;
   onError?: (error: string) => void;
 }
@@ -30,42 +30,22 @@ export function ProcessFolderButton({
     setFileCount(null);
 
     try {
-      // First, fetch files from the folder
-      const filesResponse = await fetch(
-        `/api/drive/folders/${encodeURIComponent(folderId)}/files`
-      );
-
-      if (!filesResponse.ok) {
-        throw new Error("Failed to fetch files from folder");
-      }
-
-      const filesData = await filesResponse.json();
-      const files = filesData.files || [];
-
-      if (files.length === 0) {
-        throw new Error("No files found in this folder");
-      }
-
-      setFileCount(files.length);
-      toast.info(
-        `Found ${files.length} file${files.length > 1 ? "s" : ""} to process`
-      );
-
-      // Transform files to match API expectations
-      const filesToProcess = files.map(
-        (file: { id: string; name: string }) => ({
-          id: file.id,
-          name: file.name,
-        })
-      );
-
       // Show processing toast
       const processingToast = toast.loading(
-        `Processing ${files.length} file${files.length > 1 ? "s" : ""}...`
+        `Processing folder "${folderName || folderId}"...`
       );
 
-      // Call batch parse action
-      const results = await batchParseAction(filesToProcess);
+      // Call batch parse action with folder details
+      // FastAPI will fetch all files from the folder using the Google Bearer token
+      // Note: Server actions can throw errors that need to be caught
+      const results = await batchParseAction(folderId, folderName);
+
+      // Validate results
+      if (!Array.isArray(results)) {
+        throw new Error(
+          `Unexpected response format. Expected array, got: ${typeof results}`
+        );
+      }
 
       // Dismiss loading toast and show success
       toast.dismiss(processingToast);
@@ -84,17 +64,62 @@ export function ProcessFolderButton({
         onProcessComplete(results);
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to process folder";
+      let errorMessage = "Failed to process folder";
+
+      // Handle different error types (server actions serialize errors differently)
+      if (error instanceof Error) {
+        errorMessage = error.message || "Unknown error occurred";
+        // Log full error for debugging
+        console.error("Error processing folder:", {
+          message: error.message,
+          stack: error.stack,
+          name: error.name,
+          error,
+        });
+      } else if (error && typeof error === "object") {
+        // Handle serialized server action errors
+        const errorObj = error as Record<string, unknown>;
+        errorMessage =
+          (typeof errorObj.message === "string"
+            ? errorObj.message
+            : undefined) ||
+          (typeof errorObj.error === "string" ? errorObj.error : undefined) ||
+          (typeof errorObj.detail === "string" ? errorObj.detail : undefined) ||
+          String(errorObj) ||
+          JSON.stringify(errorObj);
+
+        console.error("Error processing folder (serialized):", {
+          error,
+          errorType: typeof error,
+          errorKeys: Object.keys(errorObj),
+          errorMessage,
+        });
+      } else {
+        // Handle primitive errors
+        errorMessage = String(error) || "Unknown error occurred";
+        console.error("Unknown error processing folder:", {
+          error,
+          errorType: typeof error,
+        });
+      }
+
+      // Ensure we have a meaningful error message
+      if (
+        !errorMessage ||
+        errorMessage === "{}" ||
+        errorMessage === "[object Object]"
+      ) {
+        errorMessage =
+          "An unexpected error occurred. Please check the console for details.";
+      }
 
       toast.error("Failed to process folder", {
         description: errorMessage,
+        duration: 5000,
       });
 
       if (onError) {
         onError(errorMessage);
-      } else {
-        console.error("Error processing folder:", error);
       }
     } finally {
       setProcessing(false);

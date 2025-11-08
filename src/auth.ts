@@ -40,7 +40,64 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.refreshToken = account.refresh_token;
         token.expiresAt = account.expires_at;
         token.id = user?.id || token.sub;
+        return token;
       }
+
+      // Check if access token is expired and refresh if needed
+      if (token.expiresAt && token.refreshToken) {
+        const expiresAt = token.expiresAt as number;
+        const now = Math.floor(Date.now() / 1000);
+        
+        // Refresh token if it expires in less than 5 minutes
+        if (expiresAt < now + 300) {
+          try {
+            console.log("Access token expired or expiring soon, refreshing...");
+            
+            const response = await fetch("https://oauth2.googleapis.com/token", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: new URLSearchParams({
+                client_id: process.env.GOOGLE_CLIENT_ID!,
+                client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+                refresh_token: token.refreshToken as string,
+                grant_type: "refresh_token",
+              }),
+            });
+
+            if (!response.ok) {
+              console.error("Failed to refresh token:", await response.text());
+              // Clear tokens to force re-authentication
+              token.accessToken = undefined;
+              token.refreshToken = undefined;
+              token.expiresAt = undefined;
+              return token;
+            }
+
+            const refreshedTokens = await response.json();
+            
+            token.accessToken = refreshedTokens.access_token;
+            token.expiresAt = Math.floor(Date.now() / 1000) + (refreshedTokens.expires_in || 3600);
+            
+            // Update refresh token if provided (Google may not always return it)
+            if (refreshedTokens.refresh_token) {
+              token.refreshToken = refreshedTokens.refresh_token;
+            }
+
+            console.log("Token refreshed successfully", {
+              newExpiresAt: token.expiresAt,
+            });
+          } catch (error) {
+            console.error("Error refreshing token:", error);
+            // Clear tokens to force re-authentication
+            token.accessToken = undefined;
+            token.refreshToken = undefined;
+            token.expiresAt = undefined;
+          }
+        }
+      }
+
       // Return token (persist existing token if account is not present)
       return token;
     },

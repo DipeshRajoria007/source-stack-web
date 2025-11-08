@@ -13,20 +13,24 @@ export interface GoogleDriveFolder extends GoogleDriveFile {
 
 /**
  * Get Google Drive API access token from session
+ *
+ * This function will trigger token refresh if needed via NextAuth's JWT callback
  */
 export async function getAccessToken(): Promise<string | null> {
   const session = await auth();
 
   if (!session) {
+    console.warn("No session found. User needs to sign in.");
     return null;
   }
 
   // Check for access token in session
+  // Note: If token is expired, NextAuth's JWT callback should refresh it
   const accessToken = (session as { accessToken?: string })?.accessToken;
 
   if (!accessToken) {
     console.warn(
-      "Access token not found in session. User may need to re-authenticate."
+      "Access token not found in session. User may need to sign out and sign in again to grant permissions."
     );
   }
 
