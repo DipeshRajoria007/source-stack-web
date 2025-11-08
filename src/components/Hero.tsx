@@ -15,7 +15,7 @@ export default function Hero() {
   const getCardStyles = (index: number) => {
     const positions = [
       {
-        bottom: 0,
+        bottom: 30,
         translateX: 8,
         translateY: 8,
         rotate: -3,
@@ -24,7 +24,7 @@ export default function Hero() {
         scale: 0.95,
       },
       {
-        bottom: 12,
+        bottom: 42,
         translateX: 4,
         translateY: 4,
         rotate: 1.5,
@@ -33,7 +33,7 @@ export default function Hero() {
         scale: 0.98,
       },
       {
-        bottom: 24,
+        bottom: 54,
         translateX: 0,
         translateY: 0,
         rotate: 0,
