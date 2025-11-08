@@ -1,6 +1,6 @@
 import Background from "@/components/Background";
 import Navbar from "@/components/Navbar";
-import Link from "next/link";
+import { ButtonLink } from "@/components/ui/button-link";
 import { Check, Zap, Shield, Clock, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -27,11 +27,14 @@ export default function PricingPage() {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
                 Automate your workflow.
                 <br />
-                <span className="text-white/80">Right now, it's free.</span>
+                <span className="text-white/80">
+                  Right now, it&apos;s free.
+                </span>
               </h1>
               <p className="text-gray-300 text-lg md:text-xl max-w-3xl mx-auto">
-                Start automating your hiring stack today. No credit card required.
-                Get started in seconds and transform how you manage candidate data.
+                Start automating your hiring stack today. No credit card
+                required. Get started in seconds and transform how you manage
+                candidate data.
               </p>
             </div>
 
@@ -61,12 +64,9 @@ export default function PricingPage() {
                   </p>
                 </div>
 
-                <Link
-                  href="/login"
-                  className="block w-full bg-white text-black px-8 py-4 rounded-lg text-base font-medium hover:bg-gray-100 transition-colors text-center mb-8"
-                >
+                <ButtonLink href="/login" size="lg" className="w-full mb-8">
                   Get Started Free
-                </Link>
+                </ButtonLink>
 
                 {/* Features List */}
                 <div className="space-y-4 mb-8">
@@ -199,18 +199,12 @@ export default function PricingPage() {
                 Start free, no credit card required.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link
-                  href="/login"
-                  className="bg-white text-black px-8 py-4 rounded-lg text-base font-medium hover:bg-gray-100 transition-colors"
-                >
+                <ButtonLink href="/login" size="lg">
                   Get Started Free
-                </Link>
-                <Link
-                  href="/features"
-                  className="bg-transparent border-2 border-white/30 text-white px-8 py-4 rounded-lg text-base font-medium hover:bg-white/10 transition-all duration-300"
-                >
+                </ButtonLink>
+                <ButtonLink href="/features" variant="outline" size="lg">
                   View Features
-                </Link>
+                </ButtonLink>
               </div>
             </div>
           </div>
@@ -219,4 +213,3 @@ export default function PricingPage() {
     </div>
   );
 }
-

@@ -1,4 +1,6 @@
 import { Play, FileText, Table2, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 
 export default function Hero() {
   return (
@@ -17,13 +19,13 @@ export default function Hero() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-          <button className="bg-white text-black px-8 py-4 rounded-lg text-base font-medium hover:bg-gray-100 transition-colors">
+          <ButtonLink href="/login" size="lg">
             Get Started Free
-          </button>
-          <button className="bg-transparent border-2 border-white/30 text-white px-8 py-4 rounded-lg text-base font-medium hover:bg-white/10 transition-all duration-300 flex items-center gap-2">
+          </ButtonLink>
+          <Button variant="outline" size="lg">
             <Play className="w-4 h-4" />
             Watch Demo
-          </button>
+          </Button>
         </div>
 
         {/* Screenshot Mock - Resume PDF → Spreadsheet */}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Layers } from "lucide-react";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 
 export default function Navbar() {
   return (
@@ -24,19 +25,11 @@ export default function Navbar() {
         >
           Pricing
         </Link>
-        <a
-          href="#"
-          className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
-        >
-          Login
-        </a>
       </nav>
 
       {/* Right CTA */}
       <div className="ml-auto">
-        <button className="bg-white text-black px-6 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors">
-          Get Started
-        </button>
+        <GoogleSignInButton />
       </div>
     </header>
   );
