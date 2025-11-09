@@ -19,6 +19,9 @@ if (!API_KEY) {
   throw new Error("FASTAPI_KEY environment variable is not set");
 }
 
+// TypeScript type assertion: we've verified API_KEY exists above
+const API_KEY_STRING: string = API_KEY;
+
 /**
  * Options for apiFetch
  */
@@ -58,7 +61,7 @@ export async function apiFetch<T>(
 
   // Build headers
   const requestHeaders: HeadersInit = {
-    "X-API-Key": API_KEY,
+    "X-API-Key": API_KEY_STRING,
   };
 
   // Add Google Bearer token if provided
