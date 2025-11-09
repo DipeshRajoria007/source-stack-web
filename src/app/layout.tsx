@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
 import { Toaster } from "sonner";
@@ -68,6 +69,7 @@ export default function RootLayout({
           closeButton
           theme="dark"
         />
+        <SpeedInsights />
       </body>
     </html>
   );
