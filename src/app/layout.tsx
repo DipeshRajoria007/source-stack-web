@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
@@ -64,6 +65,7 @@ export default function RootLayout({
       >
         <AuthSessionProvider>{children}</AuthSessionProvider>
         <Toaster position="bottom-right" richColors closeButton theme="dark" />
+        <Analytics />
         <SpeedInsights />
       </body>
     </html>
