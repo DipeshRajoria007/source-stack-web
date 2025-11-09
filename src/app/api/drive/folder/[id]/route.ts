@@ -4,7 +4,7 @@ import { getAccessToken, getFolderPath } from "@/lib/google-drive";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check if user is authenticated
@@ -29,7 +29,8 @@ export async function GET(
       );
     }
 
-    const folderId = params.id;
+    const resolvedParams = await params;
+    const folderId = resolvedParams.id;
     const path = await getFolderPath(accessToken, folderId);
 
     return NextResponse.json({ path });
