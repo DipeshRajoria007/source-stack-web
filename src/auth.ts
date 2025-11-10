@@ -1,12 +1,35 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
+const requiredEnvVars = [
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
+  "AUTH_SECRET",
+] as const;
+
+const missingEnvVars = requiredEnvVars.filter(
+  (key) => !process.env[key] || process.env[key] === ""
+);
+
+if (missingEnvVars.length > 0) {
+  throw new Error(
+    `Missing environment variables required for NextAuth: ${missingEnvVars.join(
+      ", "
+    )}`
+  );
+}
+
+const googleClientId = process.env.GOOGLE_CLIENT_ID!;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET!;
+const authSecret = process.env.AUTH_SECRET!;
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
+  secret: authSecret,
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
       authorization: {
         params: {
           scope: [
